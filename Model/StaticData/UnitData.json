@@ -1,0 +1,64 @@
+[
+    {
+        "Name": "Spearman",
+        "Type": "LightInfantry",
+        "UnitSymbol": "s",
+        "Size": 1,
+
+        "Health": 10,
+        "Moral": 5,
+        "Armor": 1,
+
+        "LightDamage": 4,
+        "HeavyDamage": 1,
+        "RangedCombat": 0,
+
+        "Disengagement": 100,
+        "Skirmish": 100,
+        "Engagement": 100,
+
+        "Traits": []
+    },
+
+    {
+        "Name": "Axeman",
+        "Type": "HeavyInfantry",
+        "UnitSymbol": "a",
+        "Size": 1,
+
+        "Health": 15,
+        "Moral": 10,
+        "Armor": 10,
+
+        "LightDamage": 6,
+        "HeavyDamage": 3,
+        "RangedCombat": 0,
+
+        "Disengagement": 0,
+        "Skirmish": 75,
+        "Engagement": 150,
+
+        "Traits": []
+    },
+
+    {
+        "Name": "Archer",
+        "Type": "Ranged",
+        "UnitSymbol": "a",
+        "Size": 1,
+
+        "Health": 5,
+        "Moral": 4,
+        "Armor": 0,
+
+        "LightDamage": 2,
+        "HeavyDamage": 0,
+        "RangedCombat": 4,
+
+        "Disengagement": 75,
+        "Skirmish": 100,
+        "Engagement": 100,
+
+        "Traits": []
+    }
+]
