@@ -12,6 +12,7 @@
         "LightDamage": 4,
         "HeavyDamage": 1,
         "RangedCombat": 0,
+        "Flanking": 1,
 
         "Disengagement": 100,
         "Skirmish": 100,
@@ -33,6 +34,7 @@
         "LightDamage": 6,
         "HeavyDamage": 3,
         "RangedCombat": 0,
+        "Flanking": 1,
 
         "Disengagement": 0,
         "Skirmish": 75,
@@ -54,6 +56,7 @@
         "LightDamage": 2,
         "HeavyDamage": 0,
         "RangedCombat": 4,
+        "Flanking": 2,
 
         "Disengagement": 75,
         "Skirmish": 100,

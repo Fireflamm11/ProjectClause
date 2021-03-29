@@ -13,8 +13,9 @@ namespace ProjectClause.Model
         public Hero FlankLeader { get; private set; }
         public List<string> Conditions { get; private set; }
         public Dictionary<Unit, int> ReserveUnits { get; private set; }
-        public Unit[] Frontline { get; private set; }
-        public Unit[] Backline { get; private set; }
+        //public Unit[] Frontline { get; private set; }
+        //public Unit[] Backline { get; private set; }
+        public List<Unit[]> Battlelines { get; private set; } = new List<Unit[]>();
 
         public Flank()
         {
@@ -50,20 +51,22 @@ namespace ProjectClause.Model
 
         public void SetupFormation()
         {
-            Frontline = new Unit[FlankWidth];
+            Battlelines.Add(new Unit[FlankWidth]); //Frontline
+            Battlelines.Add(new Unit[FlankWidth]); //Backline
 
             //TODO actual setup
-            for (int i = 0; i < Frontline.Length; i ++)
-            {
-                Frontline[i] = new Unit(ReserveUnits.Keys.First());
-                ReserveUnits[ReserveUnits.Keys.First()]--;
-            }
+            foreach (Unit[] line in Battlelines)
+                for (int i = 0; i < line.Length; i++)
+                {
+                    line[i] = new Unit(ReserveUnits.Keys.First());
+                    ReserveUnits[ReserveUnits.Keys.First()]--;
+                }
 
         }
 
         public void RefillBattlelines(Unit[] battleline)
         {
-            for(int i = 0; i<battleline.Length;i++)
+            for (int i = 0; i < battleline.Length; i++)
             {
                 if (battleline[i] == null)
                 {
@@ -97,27 +100,27 @@ namespace ProjectClause.Model
         {
             try
             {
-                RefillBattlelines(Frontline);
+                RefillBattlelines(Battlelines[0]);
             }
             catch (EmptyReserveException)
             {
-                
+
             }
         }
 
         public void UnitKilled(Unit killedUnit, int formationColumn = -1)
         {
             //TODO Remove killed unit from Flank troop pool
-            int index=-1;
+            int index = -1;
             if (formationColumn != -1)
             {
                 index = formationColumn;
             }
             else
             {
-                for (int x=0;x<Frontline.Length;x++)
+                for (int x = 0; x < Battlelines[0].Length; x++)
                 {
-                    if (Frontline[x] == killedUnit)
+                    if (Battlelines[0][x] == killedUnit)
                     {
                         index = x;
                     }
@@ -128,18 +131,20 @@ namespace ProjectClause.Model
 
         private void KillUnit(Unit unit, int index)
         {
-            Frontline[index] = null;
+            Battlelines[0][index] = null;
             unit.Die();
         }
 
         public bool IsEmpty()
         {
-            foreach(int x in ReserveUnits.Values)
+            foreach (Unit[] line in Battlelines)
             {
-                if (x != 0)
-                {
-                    return false;
-                }
+                if (line != null) { return false; }
+            }
+
+            foreach (int x in ReserveUnits.Values)
+            {
+                if (x != 0) { return false; }
             }
 
             return true;

@@ -29,11 +29,13 @@ namespace ProjectClause.Model
             //Console.WriteLine(" ********************");
             //Print top army
             Console.WriteLine(battle.Armies[0].ArmyLeader.Name);
-            PrintLine(battle.Armies[0]);
+            PrintLine(battle.Armies[0], 1);
+            PrintLine(battle.Armies[0], 0);
 
             Console.WriteLine("----------------------");
             //Print bottom army
-            PrintLine(battle.Armies[1]);
+            PrintLine(battle.Armies[1], 0);
+            PrintLine(battle.Armies[1], 1);
             Console.WriteLine(battle.Armies[1].ArmyLeader.Name);
 
             //Console.WriteLine(" ********************");
@@ -42,19 +44,19 @@ namespace ProjectClause.Model
             Round++;
         }
 
-        private static void PrintLine(Army army)
+        private static void PrintLine(Army army, int lineIndex)
         {
             string line = " ";
 
             foreach (Flank flank in army.Flanks)
             {
-                line += PrintFlank(flank.Frontline);
+                line += PrintLineFlank(flank.Battlelines[lineIndex]);
             }
             line = line.Remove(line.Length - 1);
             Console.WriteLine(line);
         }
 
-        private static string PrintFlank(Unit[] units)
+        private static string PrintLineFlank(Unit[] units)
         {
             string line = "";
             foreach (Unit u in units)

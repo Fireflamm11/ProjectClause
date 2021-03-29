@@ -20,6 +20,7 @@ namespace ProjectClause.Model
         public double LightDamage { get; set; }
         public double HeavyDamage { get; set; }
         public double RangedCombat { get; set; }
+        public int Flanking { get; set; }
         //Multiplicative stats used in different situations, set in percent
         public double Disengagement { get; set; }
         public double Skirmish { get; set; }
