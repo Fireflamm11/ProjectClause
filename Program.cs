@@ -14,8 +14,8 @@ namespace ProjectClause
     {
         public static void Main(string[] args)
         {
-            //CreateHostBuilder(args).Build().Run();
-            Starter.Start();
+            CreateHostBuilder(args).Build().Run();
+            //Starter.Start();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

@@ -21,5 +21,11 @@ namespace ProjectClause.Pages
         {
 
         }
+
+        public IActionResult OnPostStartBattle()
+        {
+            Model.Starter.Start();
+            return RedirectToPage("./Battle");
+        }
     }
 }

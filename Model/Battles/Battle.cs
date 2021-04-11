@@ -63,6 +63,7 @@ namespace ProjectClause.Model
             RoundDeaths += ClashFlanks(new Flank[] { Armies[0].Left, Armies[1].Left }, Battlewidth[0]);
             RoundDeaths += ClashFlanks(new Flank[] { Armies[0].Center, Armies[1].Center }, Battlewidth[1]);
             RoundDeaths += ClashFlanks(new Flank[] { Armies[0].Right, Armies[1].Right }, Battlewidth[2]);
+
             RoundEnd(RoundDeaths);
         }
 
@@ -72,53 +73,114 @@ namespace ProjectClause.Model
             int lines = flanks[0].Battlelines.Count;
             if (lines < flanks[1].Battlelines.Count) { lines = flanks[1].Battlelines.Count; }
 
-            for (int x = 0; x < lines - 1; x++)
-                for (int i = 0; i < flankwidth; i++)
+
+            RoundDeaths += ResolveMelee(flanks, flankwidth);
+            for (int line = 1; line < lines; line++)
+            {
+                if (flanks[0].Battlelines[line] == null && flanks[1].Battlelines[line] == null)
                 {
-                    if (flanks[0].Battlelines[x] == null || flanks[1].Battlelines[x] == null)
-                    {
-                        //TODO flanking of whole Flanks
-                        continue;
-                    }
-
-                    //Each field must be checked, wheather it is empty(no unit on it) before dealing dmg
-                    Unit defender1 = new(), defender2 = new();
-                    if (flanks[0].Battlelines[x][i] != null)
-                    {
-                        defender1 = GetDefenderIndex(flanks[1], 0, i, flanks[0].Battlelines[x][i].Flanking);
-                    }
-                    if (flanks[1].Battlelines[x][i] != null)
-                    {
-                        defender2 = GetDefenderIndex(flanks[0], 0, i, flanks[1].Battlelines[x][i].Flanking);
-                    }
-
-                    if (defender1 != null && flanks[0].Battlelines[x][i] != null)
-                    {
-                        DealDmg(flanks[0].Battlelines[x][i], defender1);
-                    }
-                    if (defender2 != null && flanks[1].Battlelines[x][i] != null)
-                    {
-                        DealDmg(flanks[1].Battlelines[x][i], defender2);
-                    }
-
-                    //Similar to above we must check for null in case of a dead unity before trying to kill it
-                    if ((flanks[0].Battlelines[x][i] != null) && flanks[0].Battlelines[x][i].Health <= 0)
-                    {
-                        RoundDeaths++;
-                        flanks[0].UnitKilled(flanks[0].Battlelines[x][i], i);
-                    }
-                    if ((flanks[1].Battlelines[x][i] != null) && flanks[1].Battlelines[x][i].Health <= 0)
-                    {
-                        RoundDeaths++;
-                        flanks[1].UnitKilled(flanks[1].Battlelines[x][i], i);
-                    }
+                    //Both Flank lines are empty, so they can be ignored
+                    continue;
                 }
+
+                if (flanks[0].Battlelines[line] == null || flanks[1].Battlelines[line] == null)
+                {
+                    //TODO flanking of whole Flanks
+                    continue;
+                }
+
+                RoundDeaths += ResolveRanged(flanks, line, flankwidth);
+            }
 
             CheckBettleStatus();
             return RoundDeaths;
         }
 
-        private Unit GetDefenderIndex(Flank defendingFlank, int battleLineIndexAttacker, int unitIndexAttacker, int flankingAttaker)
+        private int ResolveMelee(Flank[] flanks, int flankwidth)
+        {
+            if (flanks[0].Battlelines[0] == null && flanks[1].Battlelines[0] == null)
+            {
+                //Both Flank lines are empty, so they can be ignored
+                return 0;
+            }
+
+            if (flanks[0].Battlelines[0] == null || flanks[1].Battlelines[0] == null)
+            {
+                //TODO flanking of whole Flanks
+                return 0;
+            }
+
+            int RoundDeaths = 0;
+            for (int unitLineIndex = 0; unitLineIndex < flankwidth; unitLineIndex++)
+            {
+                //Each field must be checked, wheather it is empty(no unit on it) before dealing dmg
+                Unit defenderArmy1 = new(), defenderArmy2 = new();
+                if (flanks[0].Battlelines[0][unitLineIndex] != null)
+                {
+                    defenderArmy1 = GetDefenderHorizontal(flanks[1], 0, unitLineIndex, flanks[0].Battlelines[0][unitLineIndex].Flanking);
+                }
+                if (flanks[1].Battlelines[0][unitLineIndex] != null)
+                {
+                    defenderArmy2 = GetDefenderHorizontal(flanks[0], 0, unitLineIndex, flanks[1].Battlelines[0][unitLineIndex].Flanking);
+                }
+
+                if (defenderArmy1 != null && flanks[0].Battlelines[0][unitLineIndex] != null)
+                {
+                    if (DealDmg(flanks[0].Battlelines[0][unitLineIndex], defenderArmy1))
+                    {
+                        RoundDeaths++;
+                        flanks[0].UnitKilled(flanks[0].Battlelines[0][unitLineIndex], unitLineIndex);
+                    }
+                }
+                if (defenderArmy2 != null && flanks[1].Battlelines[0][unitLineIndex] != null)
+                {
+                    if (DealDmg(flanks[1].Battlelines[0][unitLineIndex], defenderArmy2))
+                    {
+                        RoundDeaths++;
+                        flanks[1].UnitKilled(flanks[1].Battlelines[0][unitLineIndex], unitLineIndex);
+                    }
+                }
+            }
+            return RoundDeaths;
+        }
+
+        private int ResolveRanged(Flank[] flanks, int line, int flankwidth)
+        {
+            int RoundDeaths = 0;
+            for (int unitLineIndex = 0; unitLineIndex < flankwidth; unitLineIndex++)
+            {
+                //Each field must be checked, wheather it is empty(no unit on it) before dealing dmg
+                Unit defenderUnitArmy1 = new(), defenderUnitArmy2 = new();
+                if (flanks[0].Battlelines[line][unitLineIndex] != null)
+                {
+                    defenderUnitArmy1 = GetDefenderIndexVerticalAndHorizontal(flanks[1], line, unitLineIndex, flanks[0].Battlelines[line][unitLineIndex].Flanking);
+                }
+                if (flanks[1].Battlelines[line][unitLineIndex] != null)
+                {
+                    defenderUnitArmy2 = GetDefenderIndexVerticalAndHorizontal(flanks[0], line, unitLineIndex, flanks[1].Battlelines[line][unitLineIndex].Flanking);
+                }
+
+                if (defenderUnitArmy1 != null && flanks[0].Battlelines[line][unitLineIndex] != null)
+                {
+                    if (DealDmg(flanks[0].Battlelines[line][unitLineIndex], defenderUnitArmy1, false))
+                    {
+                        RoundDeaths++;
+                        flanks[0].UnitKilled(flanks[line].Battlelines[line][unitLineIndex], unitLineIndex);
+                    }
+                }
+                if (defenderUnitArmy2 != null && flanks[1].Battlelines[line][unitLineIndex] != null)
+                {
+                    if (DealDmg(flanks[1].Battlelines[line][unitLineIndex], defenderUnitArmy2, false))
+                    {
+                        RoundDeaths++;
+                        flanks[1].UnitKilled(flanks[1].Battlelines[line][unitLineIndex], unitLineIndex);
+                    }
+                }
+            }
+            return RoundDeaths;
+        }
+
+        private Unit GetDefenderHorizontal(Flank defendingFlank, int battleLineIndexAttacker, int unitIndexAttacker, int flankingAttaker)
         {
             if (defendingFlank.Battlelines[battleLineIndexAttacker][unitIndexAttacker] != null)
             {
@@ -126,47 +188,64 @@ namespace ProjectClause.Model
             }
             else
             {
-                //Flanking
-                //Decide on a random base, whether to attack left or right
-                Random rand = new();
-                int LeftOrRight = rand.Next(0, 2);
                 int flankingCounter = 0;
 
-                if (LeftOrRight == 0)
+                //Alternate between left and right, starting with right side enemies
+                for (int i = 1; i <= flankingAttaker; i++)
                 {
-                    //Attack left == index-1
-                    for (int i = unitIndexAttacker - 1; i >= 0; i--)
+                    //Check if there is an enemy to the right
+                    if (defendingFlank.Battlelines[battleLineIndexAttacker][unitIndexAttacker + 1] != null)
                     {
-                        if (defendingFlank.Battlelines[battleLineIndexAttacker][i] != null)
-                        {
-                            return defendingFlank.Battlelines[battleLineIndexAttacker][i];
-                        }
-                        flankingCounter++;
-                        if (flankingCounter >= flankingAttaker) { break; }
+                        return defendingFlank.Battlelines[battleLineIndexAttacker][unitIndexAttacker + 1];
                     }
-                }
-                else
-                {
-                    //Attack right == index+1
-                    for (int i = unitIndexAttacker + 1; i < defendingFlank.Battlelines[battleLineIndexAttacker].Length; i++)
+                    //Check if there is an enemy to the left
+                    if (defendingFlank.Battlelines[battleLineIndexAttacker][unitIndexAttacker - 1] != null)
                     {
-                        if (defendingFlank.Battlelines[battleLineIndexAttacker][unitIndexAttacker] != null)
-                        {
-                            return defendingFlank.Battlelines[battleLineIndexAttacker][i];
-                        }
-                        flankingCounter++;
-                        if (flankingCounter >= flankingAttaker) { break; }
+                        return defendingFlank.Battlelines[battleLineIndexAttacker][unitIndexAttacker - 1];
                     }
+
+                    if (flankingCounter >= flankingAttaker) { break; }
+                    flankingCounter++;
                 }
             }
             //throw new Exception("Couldn't find unit to flank " + unitIndexAttacker);
             return null;
         }
 
-        private void DealDmg(Unit attacker, Unit defender)
+        private Unit GetDefenderIndexVerticalAndHorizontal(Flank defendingFlank, int lineIndexAttacker, int unitIndexAttacker, int flankingAttaker)
         {
-            Random rand = new();
-            _ = defender.DamageTaken((rand.NextDouble() + 0.5) * attacker.LightDamage);
+            for (int lineIndex = lineIndexAttacker; lineIndex >= 0; lineIndex--)
+            {
+                if (defendingFlank.Battlelines[lineIndex][unitIndexAttacker] != null)
+                {
+                    return defendingFlank.Battlelines[lineIndex][unitIndexAttacker];
+                }
+                else
+                {
+                    Unit horizontalDefender = GetDefenderHorizontal(defendingFlank, lineIndex, unitIndexAttacker, flankingAttaker);
+                    if (horizontalDefender != null)
+                    {
+                        return horizontalDefender;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private bool DealDmg(Unit attacker, Unit defender, bool melee = true)
+        {
+            double dmg = 0;
+            if (melee)
+            {
+                dmg += attacker.LightMelee-defender.Armor+attacker.HeavyMelee;
+            }
+            else
+            {
+                dmg += attacker.LightRanged - defender.Armor + attacker.HeavyRanged;
+            }
+            double health = defender.DamageTaken(dmg);
+            if (health <= 0) return false;
+            return true;
         }
 
         private bool CheckBettleStatus()

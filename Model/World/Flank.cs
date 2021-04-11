@@ -55,12 +55,17 @@ namespace ProjectClause.Model
             Battlelines.Add(new Unit[FlankWidth]); //Backline
 
             //TODO actual setup
-            foreach (Unit[] line in Battlelines)
-                for (int i = 0; i < line.Length; i++)
-                {
-                    line[i] = new Unit(ReserveUnits.Keys.First());
-                    ReserveUnits[ReserveUnits.Keys.First()]--;
-                }
+            for (int i = 0; i < Battlelines[0].Length; i++)
+            {
+                Battlelines[0][i] = new Unit(ReserveUnits.Keys.First());
+                ReserveUnits[ReserveUnits.Keys.First()]--;
+            }
+
+            for (int i = 0; i < Battlelines[1].Length; i++)
+            {
+                Battlelines[1][i] = new Unit(ReserveUnits.Keys.ToList()[2]);
+                ReserveUnits[ReserveUnits.Keys.ToList()[2]]--;
+            }
 
         }
 
@@ -80,6 +85,19 @@ namespace ProjectClause.Model
                     }
                 }
             }
+        }
+
+        public void MoveUpEmptyRanks()
+        {
+            for (int line = Battlelines.Count - 1; line > 0; line--)
+                for (int unitIndex = 0; unitIndex < FlankWidth; unitIndex++)
+                {
+                    if (Battlelines[line - 1][unitIndex] == null)
+                    {
+                        Battlelines[line - 1][unitIndex] = Battlelines[line][unitIndex];
+                        Battlelines[line][unitIndex] = null;
+                    }
+                }
         }
 
         private Unit GetUnitFromReseve()
@@ -106,6 +124,8 @@ namespace ProjectClause.Model
             {
 
             }
+
+            MoveUpEmptyRanks();
         }
 
         public void UnitKilled(Unit killedUnit, int formationColumn = -1)

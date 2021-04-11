@@ -1,0 +1,139 @@
+﻿@page
+@model ProjectClause.Pages.BattleModel
+@{
+    ViewData["Title"] = "Battle";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Battle</h1>
+    <div class="row">
+        <form method="post">
+            <button type="submit" asp-page-handler="NextRound">
+                NextRound
+            </button>
+        </form>
+        <form method="post">
+            <button type="submit" asp-page-handler="EndBattle">
+                End Battle
+            </button>
+        </form>
+    </div>
+
+    <!--First army-->
+    <div class="row">
+        <!--First flank-->
+        <table>
+            <tbody>
+                @foreach (char[] line in Model.RoundStatus.army1[0].Reverse<char[]>())
+                {
+                <tr>
+                    @foreach (char unit in line)
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => unit)
+                        </td>
+                    }
+                    <td>|</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+        <!--second flank-->
+        <table>
+            <tbody>
+                @foreach (char[] line in Model.RoundStatus.army1[1].Reverse<char[]>())
+                {
+                <tr>
+                    @foreach (char unit in line)
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => unit)
+                        </td>
+                    }
+                    <td>|</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+        <!--third flank-->
+        <table>
+            <tbody>
+                @foreach (char[] line in Model.RoundStatus.army1[2].Reverse<char[]>())
+                {
+                    <tr>
+                        @foreach (char unit in line)
+                        {
+                            <td>
+                                @Html.DisplayFor(modelItem => unit)
+                            </td>
+                        }
+                        <td>|</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+    <hr />
+
+    <!--Second army-->
+    <div class="row">
+        <!--First flank-->
+        <table>
+            <tbody>
+                @foreach (char[] line in Model.RoundStatus.army2[0])
+                {
+                    <tr>
+                        @foreach (char unit in line)
+                        {
+                            <td>
+                                @Html.DisplayFor(modelItem => unit)
+                            </td>
+                        }
+                        <td>|</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!--second flank-->
+        <table>
+            <tbody>
+                @foreach (char[] line in Model.RoundStatus.army2[1])
+                {
+                    <tr>
+                        @foreach (char unit in line)
+                        {
+                            <td>
+                                @Html.DisplayFor(modelItem => unit)
+                            </td>
+                        }
+                        <td>|</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!--third flank-->
+        <table>
+            <tbody>
+                @foreach (char[] line in Model.RoundStatus.army2[2])
+                {
+                    <tr>
+                        @foreach (char unit in line)
+                        {
+                            <td>
+                                @Html.DisplayFor(modelItem => unit)
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</div>

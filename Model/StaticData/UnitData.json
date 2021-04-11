@@ -9,9 +9,10 @@
         "Moral": 5,
         "Armor": 1,
 
-        "LightDamage": 4,
-        "HeavyDamage": 1,
-        "RangedCombat": 0,
+        "LightMelee": 4,
+        "HeavyMelee": 1,
+        "LightRanged": 0,
+        "HeavyRanged": 0,
         "Flanking": 1,
 
         "Disengagement": 100,
@@ -24,16 +25,17 @@
     {
         "Name": "Axeman",
         "Type": "HeavyInfantry",
-        "UnitSymbol": "a",
+        "UnitSymbol": "A",
         "Size": 1,
 
         "Health": 15,
         "Moral": 10,
         "Armor": 10,
 
-        "LightDamage": 6,
-        "HeavyDamage": 3,
-        "RangedCombat": 0,
+        "LightMelee": 6,
+        "HeavyMelee": 3,
+        "LightRanged": 0,
+        "HeavyRanged": 0,
         "Flanking": 1,
 
         "Disengagement": 0,
@@ -53,9 +55,10 @@
         "Moral": 4,
         "Armor": 0,
 
-        "LightDamage": 2,
+        "LightMelee": 2,
         "HeavyDamage": 0,
-        "RangedCombat": 4,
+        "LightRanged": 0,
+        "HeavyRanged": 0,
         "Flanking": 2,
 
         "Disengagement": 75,
