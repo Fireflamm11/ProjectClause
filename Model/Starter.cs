@@ -8,11 +8,14 @@ namespace ProjectClause.Model
 {
     public class Starter
     {
+        public static void Init()
+        {
+            JsonLoader.LoadJson();
+        }
+
         public static void Start()
         {
             Console.WriteLine("Generating new random battle");
-            UnitLoader.LoadUnits();
-
             RandomBattleGenerator.GenerateRandomBattle();
         }
     }

@@ -1,23 +1,42 @@
 [
     {
+        "Name": "Peasant",
+        "Type": "LightInfantry",
+        "UnitSymbol": "p",
+        "Size": 1,
+
+        "Health": 5,
+        "Moral": 2,
+        "Armor": 0,
+
+        "LightDamage": 1,
+        "HeavyDamage": 0,
+        "Flanking": 1,
+
+        "Disengagement": 0.5,
+        "Skirmish": 0.5,
+        "Engagement": 0.5,
+
+        "Traits": []
+    },
+
+    {
         "Name": "Spearman",
         "Type": "LightInfantry",
         "UnitSymbol": "s",
         "Size": 1,
 
-        "Health": 10,
-        "Moral": 5,
-        "Armor": 1,
+        "Health": 20,
+        "Moral": 10,
+        "Armor": 2,
 
-        "LightMelee": 4,
-        "HeavyMelee": 1,
-        "LightRanged": 0,
-        "HeavyRanged": 0,
+        "LightDamage": 4,
+        "HeavyDamage": 1,
         "Flanking": 1,
 
-        "Disengagement": 100,
-        "Skirmish": 100,
-        "Engagement": 100,
+        "Disengagement": 0.5,
+        "Skirmish": 0.1,
+        "Engagement": 1,
 
         "Traits": []
     },
@@ -28,19 +47,17 @@
         "UnitSymbol": "A",
         "Size": 1,
 
-        "Health": 15,
-        "Moral": 10,
-        "Armor": 10,
+        "Health": 30,
+        "Moral": 20,
+        "Armor": 20,
 
-        "LightMelee": 6,
-        "HeavyMelee": 3,
-        "LightRanged": 0,
-        "HeavyRanged": 0,
+        "LightDamage": 6,
+        "HeavyDamage": 3,
         "Flanking": 1,
 
-        "Disengagement": 0,
-        "Skirmish": 75,
-        "Engagement": 150,
+        "Disengagement": 0.2,
+        "Skirmish": 0.25,
+        "Engagement": 1.5,
 
         "Traits": []
     },
@@ -51,19 +68,17 @@
         "UnitSymbol": "a",
         "Size": 1,
 
-        "Health": 5,
-        "Moral": 4,
-        "Armor": 0,
+        "Health": 10,
+        "Moral": 8,
+        "Armor": 2,
 
-        "LightMelee": 2,
+        "LightDamage": 2,
         "HeavyDamage": 0,
-        "LightRanged": 0,
-        "HeavyRanged": 0,
         "Flanking": 2,
 
-        "Disengagement": 75,
-        "Skirmish": 100,
-        "Engagement": 100,
+        "Disengagement": 0.8,
+        "Skirmish": 1.5,
+        "Engagement": 0.05,
 
         "Traits": []
     }

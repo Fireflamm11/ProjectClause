@@ -1,172 +1,244 @@
-﻿using ProjectClause.Model.Exceptions;
+﻿using ProjectClause.Model.StaticData;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectClause.Model
 {
     public class Flank
     {
-
+        public int FlankIndex { get; private set; }
         public int FlankWidth { get; private set; }
+        public int FlankDepth { get; private set; }
+        public int OpponentIndex { get; private set; }
         public Hero FlankLeader { get; private set; }
-        public List<string> Conditions { get; private set; }
-        public Dictionary<Unit, int> ReserveUnits { get; private set; }
-        //public Unit[] Frontline { get; private set; }
-        //public Unit[] Backline { get; private set; }
-        public List<Unit[]> Battlelines { get; private set; } = new List<Unit[]>();
+        public List<FlankCondition> Conditions { get; private set; }
+        public FlankStrategy CurrentFlankStrategy { get; private set; }
+        public Dictionary<Unit, FlankUnitsStats> ReserveUnits { get; private set; }
+        public Dictionary<Unit, FlankUnitsStats> EngagedUnits { get; private set; }
+        public Dictionary<Unit, FlankUnitsStats> DisengagingUnits { get; private set; }
+        public Dictionary<Unit, int> FleedUnits { get; private set; }
 
-        public Flank()
+        public Flank(int index)
         {
+            FlankIndex = index;
             FlankLeader = new Hero("Bodo");
-            FlankWidth = 6;
-            ReserveUnits = new Dictionary<Unit, int>();
-            Conditions = new List<string>();
+            FlankWidth = 10;
+            FlankDepth = 2;
+            ReserveUnits = new Dictionary<Unit, FlankUnitsStats>();
+            Conditions = new List<FlankCondition>();
         }
 
-        public Flank(Hero leader)
+        public Flank(Hero leader, int index)
         {
+            FlankIndex = index;
             FlankLeader = leader;
-            FlankWidth = 6;
-            ReserveUnits = new Dictionary<Unit, int>();
-            Conditions = new List<string>();
+            FlankWidth = 10;
+            FlankDepth = 2;
+            ReserveUnits = new Dictionary<Unit, FlankUnitsStats>();
+            Conditions = new List<FlankCondition>();
         }
 
-        public Flank(Hero leader, Dictionary<Unit, int> units, int width = 6)
+        public Flank(Hero leader, int index, Dictionary<Unit, FlankUnitsStats> units, int width = 10, int depth = 2)
         {
+            FlankIndex = index;
             FlankWidth = width;
+            FlankDepth = depth;
             FlankLeader = leader;
             ReserveUnits = units;
-            Conditions = new List<string>();
+            Conditions = new List<FlankCondition>();
         }
 
-        public Flank(Hero leader, Dictionary<Unit, int> units, List<string> conditions, int width = 6)
+        public Flank(Hero leader, int index, Dictionary<Unit, FlankUnitsStats> units, List<FlankCondition> conditions, int width = 6, int depth = 2)
         {
+            FlankIndex = index;
             FlankWidth = width;
+            FlankDepth = depth;
             FlankLeader = leader;
             ReserveUnits = units;
             Conditions = conditions;
         }
 
-        public void SetupFormation()
+        public void SetupFormation(Flank[] opponent, bool opponentEmpty = false)
         {
-            Battlelines.Add(new Unit[FlankWidth]); //Frontline
-            Battlelines.Add(new Unit[FlankWidth]); //Backline
-
-            //TODO actual setup
-            for (int i = 0; i < Battlelines[0].Length; i++)
+            EngagedUnits = new();
+            DisengagingUnits = new();
+            FleedUnits = new();
+            foreach (Unit unit in ReserveUnits.Keys)
             {
-                Battlelines[0][i] = new Unit(ReserveUnits.Keys.First());
-                ReserveUnits[ReserveUnits.Keys.First()]--;
+                FleedUnits.Add(unit, 0);
+
+                ReserveUnits[unit].Health = ReserveUnits[unit].Count * unit.Health;
+                ReserveUnits[unit].Moral = ReserveUnits[unit].Count * unit.Moral;
             }
 
-            for (int i = 0; i < Battlelines[1].Length; i++)
-            {
-                Battlelines[1][i] = new Unit(ReserveUnits.Keys.ToList()[2]);
-                ReserveUnits[ReserveUnits.Keys.ToList()[2]]--;
-            }
-
+            UpdateFlankStrategy(opponent, opponentEmpty);
+            OpponentIndex = FlankIndex;
         }
 
-        public void RefillBattlelines(Unit[] battleline)
+        public (double, double) DetermineAttack(Flank enemyFlank)
         {
-            for (int i = 0; i < battleline.Length; i++)
+            if (enemyFlank.IsEmpty()) return (0, 0);
+
+            DisengageUnits(CurrentFlankStrategy.DisengageUnits);
+            EngageUnits(CurrentFlankStrategy.EngageUnits);
+
+            double lightdmg = 0;
+            double heavydmg = 0;
+
+            //Disengage
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in DisengagingUnits)
             {
-                if (battleline[i] == null)
+                if (CurrentFlankStrategy.DisengageUnits.Contains(unit.Key.Type))
                 {
-                    try
-                    {
-                        battleline[i] = GetUnitFromReseve();
-                    }
-                    catch (EmptyReserveException)
-                    {
-                        throw;
-                    }
+                    lightdmg += unit.Key.LightDamage * unit.Key.Disengagement * CurrentFlankStrategy.DisengagementModificator * CurrentFlankStrategy.LightDamageModificator * unit.Value.Count;
+                    heavydmg += unit.Key.HeavyDamage * unit.Key.Disengagement * CurrentFlankStrategy.DisengagementModificator * CurrentFlankStrategy.HeavyDamageModificator * unit.Value.Count;
+                }
+            }
+            //Skirmishing
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in ReserveUnits)
+            {
+                if (CurrentFlankStrategy.SkirmishingUnits.Contains(unit.Key.Type))
+                {
+                    lightdmg += (unit.Key.LightDamage) * unit.Key.Skirmish * CurrentFlankStrategy.SkirmishModificator * CurrentFlankStrategy.LightDamageModificator * unit.Value.Count;
+                    heavydmg += (unit.Key.HeavyDamage) * unit.Key.Skirmish * CurrentFlankStrategy.SkirmishModificator * CurrentFlankStrategy.HeavyDamageModificator * unit.Value.Count;
+                }
+            }
+            //Engage
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in EngagedUnits)
+            {
+                if (CurrentFlankStrategy.EngageUnits.Contains(unit.Key.Type))
+                {
+                    lightdmg += unit.Key.LightDamage * unit.Key.Engagement * CurrentFlankStrategy.EngagementModificator * CurrentFlankStrategy.LightDamageModificator * unit.Value.Count;
+                    heavydmg += unit.Key.HeavyDamage * unit.Key.Engagement * CurrentFlankStrategy.EngagementModificator * CurrentFlankStrategy.HeavyDamageModificator * unit.Value.Count;
+                }
+            }
+
+            return (lightdmg, heavydmg);
+        }
+
+        public void RecieveAttack((double, double) dmg)
+        {
+            double sumDmg = dmg.Item1 + dmg.Item2;
+            foreach (Unit unitClass in DisengagingUnits.Keys)
+            {
+                double dmgFaktor = (2 - unitClass.Disengagement) * (2 - CurrentFlankStrategy.DisengagementModificator) * CurrentFlankStrategy.DamageDistribution[0];
+                ReceiveAttackUnit(sumDmg, dmgFaktor, unitClass, DisengagingUnits);
+            }
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in ReserveUnits)
+            {
+                if (CurrentFlankStrategy.SkirmishingUnits.Contains(unit.Key.Type))
+                {
+                    double dmgFaktor = (2 - unit.Key.Skirmish) * (2 - CurrentFlankStrategy.SkirmishModificator) * CurrentFlankStrategy.DamageDistribution[2];
+                    ReceiveAttackUnit(sumDmg, dmgFaktor, unit.Key, ReserveUnits);
+                }
+            }
+            foreach (Unit unitClass in EngagedUnits.Keys)
+            {
+                double dmgFaktor = (2 - unitClass.Engagement) * (2 - CurrentFlankStrategy.EngagementModificator) * CurrentFlankStrategy.DamageDistribution[2];
+                ReceiveAttackUnit(sumDmg, dmgFaktor, unitClass, EngagedUnits);
+            }
+        }
+
+        private void ReceiveAttackUnit(double sumDmg, double dmgFaktor, Unit unitClass, Dictionary<Unit, FlankUnitsStats> UnitDict)
+        {
+            double dmgHalf = sumDmg / 2;
+            double armDmg = dmgHalf - unitClass.Armor;
+            if (armDmg < 0) armDmg = 0;
+            double totalDmg = armDmg * dmgFaktor;
+            double moralDmg = dmgHalf * dmgFaktor;
+
+            UnitDict[unitClass].Health -= totalDmg;
+            if (UnitDict[unitClass].Health < 0) UnitDict[unitClass].Health = 0;
+            int remainingUnits = (int)(UnitDict[unitClass].Health / unitClass.Health);
+            int lossedUnits = (int)(UnitDict[unitClass].Count - remainingUnits);
+
+            UnitDict[unitClass].Moral -= moralDmg;
+            if (UnitDict[unitClass].Moral < 0) UnitDict[unitClass].Moral = 0;
+            remainingUnits = (int)(UnitDict[unitClass].Moral / unitClass.Moral);
+            int fleeingUnits = (int)(UnitDict[unitClass].Count - remainingUnits);
+
+            UnitDict[unitClass].Moral -= lossedUnits * (unitClass.Moral + 1) + fleeingUnits;
+            if (UnitDict[unitClass].Moral < 0) UnitDict[unitClass].Moral = 0;
+            UnitDict[unitClass].Health -= fleeingUnits * (unitClass.Health);
+            if (UnitDict[unitClass].Health < 0) UnitDict[unitClass].Health = 0;
+            UnitDict[unitClass].Count -= lossedUnits + fleeingUnits;
+            FleedUnits[unitClass] += fleeingUnits;
+            if (UnitDict[unitClass].Count < 0) UnitDict[unitClass].Count = 0;
+        }
+
+        private void DisengageUnits(List<UnitType> units)
+        {
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in EngagedUnits)
+            {
+                if (units.Contains(unit.Key.Type))
+                {
+                    EngagedUnits.Remove(unit.Key);
+                    DisengagingUnits.Add(unit.Key, unit.Value);
                 }
             }
         }
 
-        public void MoveUpEmptyRanks()
+        private void EngageUnits(List<UnitType> units)
         {
-            for (int line = Battlelines.Count - 1; line > 0; line--)
-                for (int unitIndex = 0; unitIndex < FlankWidth; unitIndex++)
-                {
-                    if (Battlelines[line - 1][unitIndex] == null)
-                    {
-                        Battlelines[line - 1][unitIndex] = Battlelines[line][unitIndex];
-                        Battlelines[line][unitIndex] = null;
-                    }
-                }
-        }
-
-        private Unit GetUnitFromReseve()
-        {
-            foreach (Unit u in ReserveUnits.Keys)
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in ReserveUnits)
             {
-                if (ReserveUnits[u] > 0)
+                if (units.Contains(unit.Key.Type))
                 {
-                    ReserveUnits[u]--;
-                    return new Unit(u);
+                    ReserveUnits.Remove(unit.Key);
+                    EngagedUnits.Add(unit.Key, unit.Value);
                 }
             }
+        }
 
-            throw new EmptyReserveException();
+        public void UpdateFlankStrategy(Flank[] enemyFlanks, bool opponentEmpty)
+        {
+            if (opponentEmpty)
+            {
+                OpponentIndex = FlankLeader.FlankingTarget(enemyFlanks, FlankIndex);
+            }
+            bool isFlanking = false;
+            if (OpponentIndex != FlankIndex) isFlanking = true;
+
+            CurrentFlankStrategy = FlankLeader.DecideStrategy(enemyFlanks[OpponentIndex], isFlanking);
         }
 
         public void RoundEnd()
         {
-            try
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in DisengagingUnits)
             {
-                RefillBattlelines(Battlelines[0]);
+                DisengagingUnits.Remove(unit.Key);
+                ReserveUnits.Add(unit.Key, unit.Value);
             }
-            catch (EmptyReserveException)
-            {
-
-            }
-
-            MoveUpEmptyRanks();
         }
 
-        public void UnitKilled(Unit killedUnit, int formationColumn = -1)
+        public void UnitKilled(Unit killedUnit)
         {
-            //TODO Remove killed unit from Flank troop pool
-            int index = -1;
-            if (formationColumn != -1)
-            {
-                index = formationColumn;
-            }
-            else
-            {
-                for (int x = 0; x < Battlelines[0].Length; x++)
-                {
-                    if (Battlelines[0][x] == killedUnit)
-                    {
-                        index = x;
-                    }
-                }
-            }
-            KillUnit(killedUnit, index);
-        }
-
-        private void KillUnit(Unit unit, int index)
-        {
-            Battlelines[0][index] = null;
-            unit.Die();
+            killedUnit.Die();
         }
 
         public bool IsEmpty()
         {
-            foreach (Unit[] line in Battlelines)
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in ReserveUnits)
             {
-                if (line != null) { return false; }
+                if (unit.Value.Count > 0)
+                {
+                    return false;
+                }
             }
-
-            foreach (int x in ReserveUnits.Values)
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in EngagedUnits)
             {
-                if (x != 0) { return false; }
+                if (unit.Value.Count > 0)
+                {
+                    return false;
+                }
             }
-
+            foreach (KeyValuePair<Unit, FlankUnitsStats> unit in DisengagingUnits)
+            {
+                if (unit.Value.Count > 0)
+                {
+                    return false;
+                }
+            }
             return true;
         }
     }

@@ -17,12 +17,10 @@ namespace ProjectClause.Model
         public double Moral { get; set; }
         public double Armor { get; set; }
         //Offensive Stats
-        public double LightMelee { get; set; }
-        public double HeavyMelee { get; set; }
-        public double LightRanged { get; set; }
-        public double HeavyRanged { get; set; }
+        public double LightDamage { get; set; }
+        public double HeavyDamage { get; set; }
         public int Flanking { get; set; }
-        //Multiplicative stats used in different situations, set in percent
+        //Multiplicative stats used in different situations, use as percentage multiplier
         public double Disengagement { get; set; }
         public double Skirmish { get; set; }
         public double Engagement { get; set; }
@@ -34,7 +32,7 @@ namespace ProjectClause.Model
 
         }
 
-        public Unit(string name, UnitType type, List<string> traits, char symbol = UnitSymbols.Infantry, int size = 1, int lightMelee = 1, int heavyMelee = 1, int armor = 1, int disengagement = 1, int health = 1, int moral = 1, int skirmish = 1, int engagement = 1, int lightRanged = 1, int heavyRanged = 1)
+        public Unit(string name, UnitType type, List<string> traits, char symbol = 'o', int size = 1, int lightDmg = 1, int heavyDmg = 1, int armor = 1, int disengagement = 1, int health = 1, int moral = 1, int skirmish = 1, int engagement = 1, int lightRanged = 1, int heavyRanged = 1)
         {
             Name = name;
             Type = type;
@@ -42,16 +40,14 @@ namespace ProjectClause.Model
             Size = size;
             Traits = traits;
 
-            LightMelee = lightMelee;
-            HeavyMelee = heavyMelee;
+            LightDamage = lightDmg;
+            HeavyDamage = heavyDmg;
             Armor = armor;
             Disengagement = disengagement;
             Health = health;
             Moral = moral;
             Skirmish = skirmish;
             Engagement = engagement;
-            LightRanged = lightMelee;
-            HeavyRanged = heavyRanged;
         }
 
         public Unit(Unit unit)
@@ -62,16 +58,14 @@ namespace ProjectClause.Model
             Size = unit.Size;
             Traits = new List<string>(unit.Traits);
 
-            LightMelee = unit.LightMelee;
-            HeavyMelee = unit.HeavyMelee;
+            LightDamage = unit.LightDamage;
+            HeavyDamage = unit.HeavyDamage;
             Armor = unit.Armor;
             Disengagement = unit.Disengagement;
             Health = unit.Health;
             Moral = unit.Moral;
             Skirmish = unit.Skirmish;
             Engagement = unit.Engagement;
-            LightRanged = unit.LightRanged;
-            HeavyRanged = unit.HeavyRanged;
         }
 
         public double DamageTaken(double damage)

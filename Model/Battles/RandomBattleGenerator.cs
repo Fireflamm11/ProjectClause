@@ -2,118 +2,65 @@
 using ProjectClause.Model.StaticData;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectClause.Model
 {
     public class RandomBattleGenerator
     {
-        public static Battle Battle { get; private set; }
+        public static List<Battle> Battles { get; private set; } = new();
 
         public static void GenerateRandomBattle()
         {
             Console.WriteLine("Starting Generation");
             Console.WriteLine("Generating Dummy Classes");
+            AddNewBattle();
+
+            Console.WriteLine("Starting Battle");
+        }
+
+        public static void AddNewBattle()
+        {
             Army[] Armies = new Army[] { GenerateRandomArmy(), GenerateRandomArmy() };
             string Terrain = "none";
             List<string> Conditions = new();
             Console.WriteLine("Generating Dummy Battle");
-            Battle = new(Armies, Terrain, Conditions);
-
-            Console.WriteLine("Starting Battle");
-            BattlePrint.PrintBattleHeader(Battle);
-            BattlePrint.PrintBattleState(Battle);
-
-            //while (!battle.IsOver)
-            //{
-            //    battle.BattleStep();
-            //    BattlePrint.PrintBattleState(battle);
-            //    System.Threading.Thread.Sleep(1000);
-            //}
-            //BattlePrint.PrintBattleState(battle);
-            //Console.WriteLine("Battle Done");
-
+            Battles.Add(new(Armies, Terrain, Conditions));
         }
 
-        public static BattleStatus NextRound()
+        public static List<BattleStatus> NextRound()
         {
-            Battle.BattleStep();
-            BattlePrint.PrintBattleState(Battle);
+            foreach (Battle battle in Battles)
+                battle.BattleStep();
             return GetCurrentStatus();
         }
 
         public static Army GenerateRandomArmy()
         {
-            Army army = new(GenerateRandomFlank(), GenerateRandomFlank(), GenerateRandomFlank(), " ");
+            Army army = new(GenerateRandomFlank(0), GenerateRandomFlank(1), GenerateRandomFlank(2), " ");
 
             return army;
         }
 
-        public static Flank GenerateRandomFlank()
+        public static Flank GenerateRandomFlank(int index)
         {
-            Dictionary<Unit, int> unitList = new();
+            Dictionary<Unit, FlankUnitsStats> unitList = new();
             Random rand = new();
-            foreach (Unit u in UnitLoader.UnitList)
+            foreach (Unit u in JsonLoader.UnitList)
             {
-                unitList.Add(u, rand.Next(3, 7));
+                unitList.Add(u, new(rand.Next(20, 30)));
             }
 
-            Flank flank = new(new Hero("Bodo"), unitList);
+            Flank flank = new(new Hero("Bodo"), index, unitList);
 
             return flank;
         }
 
-        public static BattleStatus GetCurrentStatus()
+        public static List<BattleStatus> GetCurrentStatus()
         {
-            List<char[]>[] army1 = { new List<char[]>(), new List<char[]>(), new List<char[]>() };
-            List<char[]>[] army2 = { new List<char[]>(), new List<char[]>(), new List<char[]>() };
-
-            for (int i = 0; i < 3; i++)
-            {
-                Flank flank1 = Battle.Armies[0].Flanks[i];
-                Flank flank2 = Battle.Armies[1].Flanks[i];
-
-                foreach (Unit[] line in flank1.Battlelines)
-                {
-                    char[] units = new char[line.Length];
-                    int counter = 0;
-                    foreach (Unit u in line)
-                    {
-                        if (u != null)
-                        {
-                            units[counter] = u.UnitSymbol;
-                        }
-                        else
-                        {
-                            units[counter] = '_';
-                        }
-                        counter++;
-                    }
-                    army1[i].Add(units);
-                }
-
-                foreach (Unit[] line in flank2.Battlelines)
-                {
-                    char[] units = new char[line.Length];
-                    int counter = 0;
-                    foreach (Unit u in line)
-                    {
-                        if (u != null)
-                        {
-                            units[counter] = u.UnitSymbol;
-                        }
-                        else
-                        {
-                            units[counter] = '_';
-                        }
-                        counter++;
-                    }
-                    army2[i].Add(units);
-                }
-            }
-
-            return new BattleStatus(army1, army2);
+            List<BattleStatus> status = new();
+            foreach (Battle battle in Battles)
+                status.Add(new BattleStatus(battle));
+            return status;
         }
 
     }

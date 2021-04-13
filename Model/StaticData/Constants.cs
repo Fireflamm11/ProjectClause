@@ -10,5 +10,6 @@ namespace ProjectClause.Model.StaticData
     {
         //Paths
         public static readonly string UnitListPath = Directory.GetCurrentDirectory() +@"\\Model\\StaticData\\UnitData.json";
+        public static readonly string FlankStrategyListPath = Directory.GetCurrentDirectory() +@"\\Model\\StaticData\\FlankStrategyData.json";
     }
 }

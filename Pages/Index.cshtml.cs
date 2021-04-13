@@ -15,6 +15,7 @@ namespace ProjectClause.Pages
         public IndexModel(ILogger<IndexModel> logger)
         {
             _logger = logger;
+            Model.Starter.Init();
         }
 
         public void OnGet()
@@ -22,10 +23,10 @@ namespace ProjectClause.Pages
 
         }
 
-        public IActionResult OnPostStartBattle()
+        public IActionResult OnPostGoToBattles()
         {
             Model.Starter.Start();
-            return RedirectToPage("./Battle");
+            return RedirectToPage("./Battles");
         }
     }
 }

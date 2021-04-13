@@ -1,0 +1,70 @@
+﻿@page
+@model ProjectClause.Pages.BattlesModel
+@{
+    ViewData["Title"] = "Battle";
+
+    object PrintFlank(int battle, int army, int flank)
+    {
+        <ul style="margin:auto">
+            @foreach (KeyValuePair<string, int> unit in Model.RoundStati[battle].armyStati[army].Flanks[flank])
+            {
+                string row = unit.Key + ": " + unit.Value.ToString();
+                <li>@row</li>
+            }
+        </ul>
+        return null;
+    }
+
+    object PrintRow(int battleIndex, int line)
+    {
+        <div class="row">
+            <b style="margin:auto">@Model.RoundStati[battleIndex].armyStati[0].FlankLeaders[line]</b>
+            @PrintFlank(battleIndex, 0, 0)
+            @PrintFlank(battleIndex, 1, 0)
+            <b style="margin:auto">@Model.RoundStati[battleIndex].armyStati[1].FlankLeaders[line]</b>
+        </div>
+
+        return null;
+    }
+
+    object PrintBattel(int battleIndex)
+    {
+        <div class="row" style="margin:auto">
+            <div class="col">
+                @PrintRow(battleIndex, 0)
+                <hr />
+                @PrintRow(battleIndex, 1)
+                <hr />
+                @PrintRow(battleIndex, 2)
+            </div>
+        </div>
+
+        return null;
+    }
+
+}
+
+<div class="text-center">
+    <h1 class="display-4">Battle</h1>
+    <div class="row">
+        <form method="post">
+            <button type="submit" asp-page-handler="AddBattle" name="Next">
+                Add new Battle
+            </button>
+        </form>
+        <form method="post">
+            <button type="submit" asp-page-handler="NextRound" name="Next">
+                NextRound
+            </button>
+        </form>
+    </div>
+    <div class="center" style="margin:auto">
+        @for (int i = 0; i < Model.RoundStati.Count; i++)
+        {
+            @PrintBattel(i)
+            <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+        }
+    </div>
+
+
+</div>

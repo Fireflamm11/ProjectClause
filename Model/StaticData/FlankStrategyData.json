@@ -1,0 +1,29 @@
+[
+    {
+        "Name": "default",
+        "TypeModificator": {},
+        "DisengageUnits": [],
+        "EngageUnits": [
+            "LightInfantry",
+            "HeavyInfantry",
+            "LightCavalry",
+            "HeavyCavalry"
+        ],
+        "SkirmishingUnits": [
+            "Ranged"
+        ],
+        "DamageDistribution": [
+            0.33,
+            0.33,
+            0.33
+        ],
+        "FlankingModificator": 1,
+
+        "LightDamageModificator": 1,
+        "HeavyDamageModificator": 1,
+
+        "SkirmishModificator": 1,
+        "EngagementModificator": 1,
+        "DisengagementModificator": 1
+    }
+]

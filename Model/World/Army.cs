@@ -14,14 +14,14 @@ namespace ProjectClause.Model
         public Flank Right { get; private set; }
         public Flank[] Flanks { get; private set; }
 
-        public Army(string name)
+        public Army(string armyName)
         {
-            Name = name;
-            ArmyLeader = new Hero(name + "Balto");
+            Name = armyName;
+            ArmyLeader = new Hero(armyName + "Balto");
 
-            Center = new Flank(ArmyLeader);
-            Left = new Flank();
-            Right = new Flank();
+            Center = new Flank(ArmyLeader, 1);
+            Left = new Flank(0);
+            Right = new Flank(2);
             Flanks = new Flank[] { Left, Center, Right };
         }
 
@@ -30,21 +30,30 @@ namespace ProjectClause.Model
             Name = "Army" + number;
             ArmyLeader = new Hero("Balto" + number);
 
-            Center = new Flank(ArmyLeader);
-            Left = new Flank();
-            Right = new Flank();
+            Center = new Flank(ArmyLeader, 1);
+            Left = new Flank(0);
+            Right = new Flank(2);
             Flanks = new Flank[] { Left, Center, Right };
         }
 
         public Army(Flank left, Flank center, Flank right, string name = "NONE")
         {
             Name = name;
-            ArmyLeader = new Hero("Balto" + name);
+            ArmyLeader = new Hero(name);
 
             Center = center;
             Left = left;
             Right = right;
             Flanks = new Flank[] { Left, Center, Right };
+        }
+
+        public bool IsBeaten()
+        {
+            if (Left.IsEmpty() && Center.IsEmpty() && Right.IsEmpty())
+            {
+                return true;
+            }
+            return false;
         }
 
         public void RoundEnd()
